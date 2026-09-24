@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Breathwork</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --card: #ffffff;
+    --ink: #2e2a26;
+    --muted: #8a8175;
+    --accent: #6b8f7a;
+    --accent-soft: #e3ece6;
+    --border: #e8e3da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1b19;
+      --card: #262420;
+      --ink: #ece7de;
+      --muted: #a39c8f;
+      --accent: #8fb6a0;
+      --accent-soft: #2b3530;
+      --border: #37342e;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    min-height: 100%;
+  }
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(140px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
+  header {
+    padding: 36px 20px 12px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .list {
+    max-width: 560px;
+    margin: 20px auto 0;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .track:active { transform: scale(0.98); }
+  .track.playing {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .track .icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  .track .icon svg { width: 16px; height: 16px; }
+  .track .label {
+    flex: 1 1 auto;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .track .bars {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+    opacity: 0;
+  }
+  .track.playing .bars { opacity: 1; }
+  .track .bars span {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: bounce 0.9s ease-in-out infinite;
+  }
+  .track .bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .track .bars span:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+  .track .bars span:nth-child(3) { height: 9px; animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  .player {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px calc(18px + env(safe-area-inset-bottom));
+    display: none;
+  }
+  .player.active { display: block; }
+  .player .now {
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .player .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .player .time {
+    font-size: 12px;
+    color: var(--muted);
+    width: 38px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .player input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+  .player .controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .playpause {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .playpause svg { width: 20px; height: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Breathwork</h1>
+  <p>Pick a technique</p>
+</header>
+
+<div class="list" id="list"></div>
+
+<div class="player" id="player">
+  <div class="now" id="now"></div>
+  <div class="row">
+    <span class="time" id="curTime">0:00</span>
+    <input type="range" id="seek" value="0" min="0" max="100" step="0.1">
+    <span class="time" id="durTime">0:00</span>
+  </div>
+  <div class="controls">
+    <button class="playpause" id="playpause" aria-label="Play/Pause">
+      <svg id="ppIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+const tracks = [
+  { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
+  { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
+  { file: "audio/box-breathing.mp3", name: "Box Breathing" },
+  { file: "audio/breathe-light.mp3", name: "Breathe Light" },
+  { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
+  { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
+  { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
+  { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
+  { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
+  { file: "audio/kriya.mp3", name: "Kriya" },
+  { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
+  { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
+];
+
+const listEl = document.getElementById("list");
+const audio = document.getElementById("audio");
+const player = document.getElementById("player");
+const nowEl = document.getElementById("now");
+const seek = document.getElementById("seek");
+const curTime = document.getElementById("curTime");
+const durTime = document.getElementById("durTime");
+const playpause = document.getElementById("playpause");
+const ppIcon = document.getElementById("ppIcon");
+
+const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+
+let currentIndex = null;
+let isSeeking = false;
+
+function fmt(t) {
+  if (!isFinite(t)) return "0:00";
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function render() {
+  listEl.innerHTML = "";
+  tracks.forEach((t, i) => {
+    const el = document.createElement("div");
+    el.className = "track" + (i === currentIndex ? " playing" : "");
+    el.innerHTML = `
+      <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${i === currentIndex && !audio.paused ? ICON_PAUSE : ICON_PLAY}</svg></div>
+      <div class="label">${t.name}</div>
+      <div class="bars"><span></span><span></span><span></span></div>
+    `;
+    el.addEventListener("click", () => selectTrack(i));
+    listEl.appendChild(el);
+  });
+}
+
+function selectTrack(i) {
+  if (currentIndex === i) {
+    togglePlay();
+    return;
+  }
+  currentIndex = i;
+  audio.src = tracks[i].file;
+  audio.play();
+  nowEl.textContent = tracks[i].name;
+  player.classList.add("active");
+  render();
+}
+
+function togglePlay() {
+  if (audio.paused) audio.play();
+  else audio.pause();
+}
+
+audio.addEventListener("play", () => { ppIcon.innerHTML = ICON_PAUSE; render(); });
+audio.addEventListener("pause", () => { ppIcon.innerHTML = ICON_PLAY; render(); });
+audio.addEventListener("ended", () => {
+  if (currentIndex !== null && currentIndex < tracks.length - 1) {
+    selectTrack(currentIndex + 1);
+  }
+});
+audio.addEventListener("timeupdate", () => {
+  if (isSeeking) return;
+  seek.value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  curTime.textContent = fmt(audio.currentTime);
+  durTime.textContent = fmt(audio.duration);
+});
+audio.addEventListener("loadedmetadata", () => {
+  durTime.textContent = fmt(audio.duration);
+});
+
+seek.addEventListener("input", () => { isSeeking = true; });
+seek.addEventListener("change", () => {
+  if (audio.duration) audio.currentTime = (seek.value / 100) * audio.duration;
+  isSeeking = false;
+});
+
+playpause.addEventListener("click", togglePlay);
+
+render();
+</script>
+
+</body>
+</html>
