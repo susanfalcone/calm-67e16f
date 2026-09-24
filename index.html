@@ -241,10 +241,11 @@ function fmt(t) {
 function render() {
   listEl.innerHTML = "";
   tracks.forEach((t, i) => {
+    const isActive = i === currentIndex && !audio.paused;
     const el = document.createElement("div");
-    el.className = "track" + (i === currentIndex ? " playing" : "");
+    el.className = "track" + (isActive ? " playing" : "");
     el.innerHTML = `
-      <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${i === currentIndex && !audio.paused ? ICON_PAUSE : ICON_PLAY}</svg></div>
+      <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${isActive ? ICON_PAUSE : ICON_PLAY}</svg></div>
       <div class="label">${t.name}</div>
       <div class="bars"><span></span><span></span><span></span></div>
     `;
@@ -260,7 +261,7 @@ function selectTrack(i) {
   }
   currentIndex = i;
   audio.src = tracks[i].file;
-  audio.play();
+  audio.play().catch((err) => console.error("playback failed:", err));
   nowEl.textContent = tracks[i].name;
   player.classList.add("active");
   render();
