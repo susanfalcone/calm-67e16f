@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Breathwork</title>
+<title>Meditations</title>
 <link rel="icon" href="data:,">
 <style>
   :root {
@@ -38,6 +38,9 @@
   body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(140px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
   }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
   header {
     padding: 36px 20px 12px;
     text-align: center;
@@ -53,6 +56,46 @@
     color: var(--muted);
     font-size: 14px;
   }
+
+  .list-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 16px 12px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .list-header .text {
+    flex: 1 1 auto;
+    text-align: center;
+    padding-right: 40px;
+  }
+  .list-header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .list-header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .back-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
   .list {
     max-width: 560px;
     margin: 20px auto 0;
@@ -118,6 +161,162 @@
     50% { transform: scaleY(1); }
   }
 
+  /* Collapsible groups within a list */
+  .group-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    cursor: pointer;
+  }
+  .group-header.playing { background: var(--accent-soft); }
+  .group-header .icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .group-header.playing .icon { background: var(--accent); color: white; }
+  .group-header .label {
+    flex: 1 1 auto;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .group-header .bars {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+    opacity: 0;
+  }
+  .group-header.playing .bars { opacity: 1; }
+  .group-header .bars span {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: bounce 0.9s ease-in-out infinite;
+  }
+  .group-header .bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .group-header .bars span:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+  .group-header .bars span:nth-child(3) { height: 9px; animation-delay: 0.3s; }
+  .group-header .chevron {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 14px;
+    transition: transform 0.15s ease;
+  }
+  .group-card.open .group-header .chevron { transform: rotate(180deg); }
+  .group-body { display: none; border-top: 1px solid var(--border); }
+  .group-card.open .group-body { display: block; }
+  .subtrack {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px 13px 20px;
+    cursor: pointer;
+    border-top: 1px solid var(--border);
+  }
+  .subtrack:first-child { border-top: none; }
+  .subtrack.playing { background: var(--accent-soft); }
+  .subtrack .icon {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .subtrack .icon svg { width: 12px; height: 12px; }
+  .subtrack .label { flex: 1 1 auto; font-size: 15px; }
+  .subtrack .bars {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 14px;
+    opacity: 0;
+  }
+  .subtrack.playing .bars { opacity: 1; }
+  .subtrack .bars span {
+    width: 2.5px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: bounce 0.9s ease-in-out infinite;
+  }
+  .subtrack .bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
+  .subtrack .bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+  .subtrack .bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+
+  /* Home screen nav cards */
+  .nav-list {
+    max-width: 560px;
+    margin: 12px auto 0;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .nav-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 20px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .nav-card:active { transform: scale(0.98); }
+  .nav-card .icon {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .nav-card .info {
+    flex: 1 1 auto;
+  }
+  .nav-card .info .title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .nav-card .info .subtitle {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .nav-card .chevron {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 20px;
+  }
+
   .player {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -176,12 +375,24 @@
 </head>
 <body>
 
-<header>
-  <h1>Breathwork</h1>
-  <p>Pick a technique</p>
-</header>
+<div class="screen active" id="home">
+  <header>
+    <h1>Meditations</h1>
+    <p>Choose a teacher</p>
+  </header>
+  <div class="nav-list" id="navList"></div>
+</div>
 
-<div class="list" id="list"></div>
+<div class="screen" id="listScreen">
+  <div class="list-header">
+    <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
+    <div class="text">
+      <h1 id="listTitle"></h1>
+      <p id="listSubtitle"></p>
+    </div>
+  </div>
+  <div class="list" id="list"></div>
+</div>
 
 <div class="player" id="player">
   <div class="now" id="now"></div>
@@ -200,22 +411,99 @@
 <audio id="audio" preload="none"></audio>
 
 <script>
-const tracks = [
-  { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
-  { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
-  { file: "audio/box-breathing.mp3", name: "Box Breathing" },
-  { file: "audio/breathe-light.mp3", name: "Breathe Light" },
-  { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
-  { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
-  { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
-  { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
-  { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
-  { file: "audio/kriya.mp3", name: "Kriya" },
-  { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
-  { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
-];
+const collections = {
+  nestor: {
+    title: "Breathwork",
+    subtitle: "James Nestor",
+    tracks: [
+      { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
+      { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
+      { file: "audio/box-breathing.mp3", name: "Box Breathing" },
+      { file: "audio/breathe-light.mp3", name: "Breathe Light" },
+      { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
+      { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
+      { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
+      { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
+      { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
+      { file: "audio/kriya.mp3", name: "Kriya" },
+      { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
+      { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
+    ],
+  },
+  dispenza: {
+    title: "Meditations",
+    subtitle: "Dr. Joe Dispenza",
+    sections: [
+      {
+        title: "Blessings of the Energy Centers",
+        tracks: [
+          { file: "audio/dispenza/blessings-original.mp3", name: "Original" },
+          { file: "audio/dispenza/blessings-iv-original-introduction.mp3", name: "IV – Introduction" },
+          { file: "audio/dispenza/blessings-iv-original-meditation.mp3", name: "IV – Meditation" },
+          { file: "audio/dispenza/blessings-iv-new-introduction.mp3", name: "IV (New) – Introduction" },
+          { file: "audio/dispenza/blessings-iv-new-meditation.mp3", name: "IV (New) – Meditation" },
+          { file: "audio/dispenza/blessings-v-explanation.mp3", name: "V – Explanation" },
+          { file: "audio/dispenza/blessings-v-meditation.mp3", name: "V – Meditation" },
+        ],
+      },
+      { tracks: [ { file: "audio/dispenza/heart-brain-synchronization.mp3", name: "Heart-Brain Synchronization" } ] },
+      { tracks: [ { file: "audio/dispenza/body-parts-space-v2.mp3", name: "Body Parts / Space – Version 2" } ] },
+      {
+        title: "Tuning In to New Potentials",
+        tracks: [
+          { file: "audio/dispenza/tuning-in-introduction.mp3", name: "Introduction" },
+          { file: "audio/dispenza/tuning-in-breath.mp3", name: "Breath" },
+          { file: "audio/dispenza/tuning-in-meditation.mp3", name: "Meditation" },
+        ],
+      },
+      { tracks: [ { file: "audio/dispenza/walking-meditation.mp3", name: "Walking Meditation: Stepping into Your Future" } ] },
+      {
+        title: "Changing Boxes",
+        tracks: [
+          { file: "audio/dispenza/changing-boxes-introduction.mp3", name: "Introduction" },
+          { file: "audio/dispenza/changing-boxes-meditation.mp3", name: "Meditation" },
+        ],
+      },
+      {
+        title: "Reconditioning the Body to a New Mind",
+        tracks: [
+          { file: "audio/dispenza/reconditioning-introduction.mp3", name: "Introduction" },
+          { file: "audio/dispenza/reconditioning-breath.mp3", name: "Breath" },
+          { file: "audio/dispenza/reconditioning-meditation.mp3", name: "Meditation" },
+        ],
+      },
+      {
+        title: "Synchronizing Your Energy to Health",
+        tracks: [
+          { file: "audio/dispenza/synchronizing-health-introduction.mp3", name: "Introduction" },
+          { file: "audio/dispenza/synchronizing-health-meditation.mp3", name: "Meditation" },
+        ],
+      },
+      {
+        title: "Synchronizing to Abundance",
+        tracks: [
+          { file: "audio/dispenza/synchronizing-abundance-introduction.mp3", name: "Introduction" },
+          { file: "audio/dispenza/synchronizing-abundance-meditation.mp3", name: "Meditation" },
+        ],
+      },
+    ],
+  },
+};
 
+Object.values(collections).forEach((c) => {
+  if (!c.sections) c.sections = [{ tracks: c.tracks }];
+  c.tracks = [];
+  c.sections.forEach((sec) => sec.tracks.forEach((t) => c.tracks.push(t)));
+});
+
+const homeEl = document.getElementById("home");
+const listScreenEl = document.getElementById("listScreen");
+const navListEl = document.getElementById("navList");
 const listEl = document.getElementById("list");
+const listTitleEl = document.getElementById("listTitle");
+const listSubtitleEl = document.getElementById("listSubtitle");
+const backBtn = document.getElementById("backBtn");
+
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 const nowEl = document.getElementById("now");
@@ -228,8 +516,30 @@ const ppIcon = document.getElementById("ppIcon");
 const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
 const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
 
-let currentIndex = null;
-let isSeeking = false;
+let viewingKey = null;
+let playingKey = null;
+let playingIndex = null;
+const openGroups = new Set();
+
+function sectionRanges(collection) {
+  let start = 0;
+  return collection.sections.map((sec, secIdx) => {
+    const range = { sec, secIdx, start, end: start + sec.tracks.length };
+    start = range.end;
+    return range;
+  });
+}
+
+function sectionForIndex(collection, index) {
+  return sectionRanges(collection).find((r) => index >= r.start && index < r.end);
+}
+
+function trackDisplayName(collectionKey, index) {
+  const c = collections[collectionKey];
+  const range = sectionForIndex(c, index);
+  const t = c.tracks[index];
+  return range && range.sec.title ? `${range.sec.title} – ${t.name}` : t.name;
+}
 
 function fmt(t) {
   if (!isFinite(t)) return "0:00";
@@ -238,33 +548,116 @@ function fmt(t) {
   return `${m}:${s}`;
 }
 
-function render() {
-  listEl.innerHTML = "";
-  tracks.forEach((t, i) => {
-    const isActive = i === currentIndex && !audio.paused;
+function renderHome() {
+  navListEl.innerHTML = "";
+  Object.keys(collections).forEach((key) => {
+    const c = collections[key];
     const el = document.createElement("div");
-    el.className = "track" + (isActive ? " playing" : "");
+    el.className = "nav-card";
     el.innerHTML = `
-      <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${isActive ? ICON_PAUSE : ICON_PLAY}</svg></div>
-      <div class="label">${t.name}</div>
-      <div class="bars"><span></span><span></span><span></span></div>
+      <div class="icon">${c.subtitle.trim().charAt(0)}</div>
+      <div class="info">
+        <div class="title">${c.subtitle}</div>
+        <div class="subtitle">${c.tracks.length} tracks</div>
+      </div>
+      <div class="chevron">›</div>
     `;
-    el.addEventListener("click", () => selectTrack(i));
-    listEl.appendChild(el);
+    el.addEventListener("click", () => showList(key));
+    navListEl.appendChild(el);
   });
 }
 
-function selectTrack(i) {
-  if (currentIndex === i) {
+function renderTrackRow(className, t, isActive, onClick) {
+  const el = document.createElement("div");
+  el.className = className + (isActive ? " playing" : "");
+  el.innerHTML = `
+    <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${isActive ? ICON_PAUSE : ICON_PLAY}</svg></div>
+    <div class="label"></div>
+    <div class="bars"><span></span><span></span><span></span></div>
+  `;
+  el.querySelector(".label").textContent = t.name;
+  el.addEventListener("click", onClick);
+  return el;
+}
+
+function renderList() {
+  const c = collections[viewingKey];
+  listTitleEl.textContent = c.title;
+  listSubtitleEl.textContent = c.subtitle;
+  listEl.innerHTML = "";
+  sectionRanges(c).forEach(({ sec, secIdx, start, end }) => {
+    if (!sec.title) {
+      sec.tracks.forEach((t, offset) => {
+        const i = start + offset;
+        const isActive = viewingKey === playingKey && i === playingIndex && !audio.paused;
+        listEl.appendChild(renderTrackRow("track", t, isActive, () => selectTrack(viewingKey, i)));
+      });
+      return;
+    }
+    const groupId = `${viewingKey}:${secIdx}`;
+    const isOpen = openGroups.has(groupId);
+    const hasPlaying = viewingKey === playingKey && playingIndex >= start && playingIndex < end && !audio.paused;
+    const card = document.createElement("div");
+    card.className = "group-card" + (isOpen ? " open" : "");
+    const header = document.createElement("div");
+    header.className = "group-header" + (hasPlaying ? " playing" : "");
+    header.innerHTML = `
+      <div class="icon">${sec.tracks.length}</div>
+      <div class="label"></div>
+      <div class="bars"><span></span><span></span><span></span></div>
+      <div class="chevron">⌄</div>
+    `;
+    header.querySelector(".label").textContent = sec.title;
+    header.addEventListener("click", () => toggleGroup(groupId));
+    card.appendChild(header);
+    const body = document.createElement("div");
+    body.className = "group-body";
+    if (isOpen) {
+      sec.tracks.forEach((t, offset) => {
+        const i = start + offset;
+        const isActive = viewingKey === playingKey && i === playingIndex && !audio.paused;
+        body.appendChild(renderTrackRow("subtrack", t, isActive, () => selectTrack(viewingKey, i)));
+      });
+    }
+    card.appendChild(body);
+    listEl.appendChild(card);
+  });
+}
+
+function toggleGroup(groupId) {
+  if (openGroups.has(groupId)) openGroups.delete(groupId);
+  else openGroups.add(groupId);
+  renderList();
+}
+
+function showHome() {
+  homeEl.classList.add("active");
+  listScreenEl.classList.remove("active");
+}
+
+function showList(key) {
+  viewingKey = key;
+  renderList();
+  homeEl.classList.remove("active");
+  listScreenEl.classList.add("active");
+}
+
+function selectTrack(collectionKey, i) {
+  if (playingKey === collectionKey && playingIndex === i) {
     togglePlay();
     return;
   }
-  currentIndex = i;
-  audio.src = tracks[i].file;
+  playingKey = collectionKey;
+  playingIndex = i;
+  const c = collections[collectionKey];
+  const t = c.tracks[i];
+  const range = sectionForIndex(c, i);
+  if (range && range.sec.title) openGroups.add(`${collectionKey}:${range.secIdx}`);
+  audio.src = t.file;
   audio.play().catch((err) => console.error("playback failed:", err));
-  nowEl.textContent = tracks[i].name;
+  nowEl.textContent = trackDisplayName(collectionKey, i);
   player.classList.add("active");
-  render();
+  renderList();
 }
 
 function togglePlay() {
@@ -272,13 +665,9 @@ function togglePlay() {
   else audio.pause();
 }
 
-audio.addEventListener("play", () => { ppIcon.innerHTML = ICON_PAUSE; render(); });
-audio.addEventListener("pause", () => { ppIcon.innerHTML = ICON_PLAY; render(); });
-audio.addEventListener("ended", () => {
-  if (currentIndex !== null && currentIndex < tracks.length - 1) {
-    selectTrack(currentIndex + 1);
-  }
-});
+audio.addEventListener("play", () => { ppIcon.innerHTML = ICON_PAUSE; renderList(); });
+audio.addEventListener("pause", () => { ppIcon.innerHTML = ICON_PLAY; renderList(); });
+audio.addEventListener("ended", () => { ppIcon.innerHTML = ICON_PLAY; renderList(); });
 audio.addEventListener("timeupdate", () => {
   if (isSeeking) return;
   seek.value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
@@ -289,6 +678,7 @@ audio.addEventListener("loadedmetadata", () => {
   durTime.textContent = fmt(audio.duration);
 });
 
+let isSeeking = false;
 seek.addEventListener("input", () => { isSeeking = true; });
 seek.addEventListener("change", () => {
   if (audio.duration) audio.currentTime = (seek.value / 100) * audio.duration;
@@ -296,8 +686,9 @@ seek.addEventListener("change", () => {
 });
 
 playpause.addEventListener("click", togglePlay);
+backBtn.addEventListener("click", showHome);
 
-render();
+renderHome();
 </script>
 
 </body>
