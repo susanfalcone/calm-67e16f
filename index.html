@@ -264,6 +264,11 @@
   .subtrack .bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
   .subtrack .bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
   .subtrack .bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+  .ext-arrow {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 15px;
+  }
 
   /* Home screen nav cards */
   .nav-list {
@@ -415,19 +420,35 @@ const collections = {
   nestor: {
     title: "Breathwork",
     subtitle: "James Nestor",
-    tracks: [
-      { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
-      { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
-      { file: "audio/box-breathing.mp3", name: "Box Breathing" },
-      { file: "audio/breathe-light.mp3", name: "Breathe Light" },
-      { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
-      { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
-      { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
-      { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
-      { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
-      { file: "audio/kriya.mp3", name: "Kriya" },
-      { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
-      { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
+    sections: [
+      {
+        tracks: [
+          { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
+          { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
+          { file: "audio/box-breathing.mp3", name: "Box Breathing" },
+          { file: "audio/breathe-light.mp3", name: "Breathe Light" },
+          { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
+          { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
+          { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
+          { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
+          { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
+          { file: "audio/kriya.mp3", name: "Kriya" },
+          { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
+          { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
+        ],
+      },
+      {
+        title: "Breathwork - Miscellaneous",
+        external: true,
+        tracks: [
+          { url: "https://youtu.be/_E-Ww1qnyLY", name: "Short Softer Breathwork (9 min)" },
+          { url: "https://youtu.be/aTlvezHjGdc", name: "Long Softer Breathwork (20 min)" },
+          { url: "https://youtu.be/u8j7Ir_cg0M", name: "Advanced Breathwork (19 min)" },
+          { url: "https://mosemusica.bandcamp.com/album/alchemy-of-breath-30-min-mix-ft-emily-ray-henderson", name: "Mini Breath Journey (30 min)" },
+          { url: "https://mosemusica.bandcamp.com/album/alchemy-of-breath-ft-emily-ray-henderson", name: "Full Breath Journey (67 min)" },
+          { url: "https://drive.google.com/file/d/1QXggjIZcMVzwtP0zxkzRM_jBH_5l9qSD/view?usp=sharing", name: "Breathing With the Earth Meditation (15 min)" },
+        ],
+      },
     ],
   },
   dispenza: {
@@ -514,6 +535,7 @@ const playpause = document.getElementById("playpause");
 const ppIcon = document.getElementById("ppIcon");
 
 const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+const ICON_EXTERNAL = '<path d="M14 3h7v7h-2V6.41l-9.3 9.3-1.41-1.42 9.29-9.29H14V3z"/><path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>';
 const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
 
 let viewingKey = null;
@@ -580,6 +602,19 @@ function renderTrackRow(className, t, isActive, onClick) {
   return el;
 }
 
+function renderExternalRow(className, t) {
+  const el = document.createElement("div");
+  el.className = className;
+  el.innerHTML = `
+    <div class="icon"><svg viewBox="0 0 24 24" fill="currentColor">${ICON_EXTERNAL}</svg></div>
+    <div class="label"></div>
+    <div class="ext-arrow">↗</div>
+  `;
+  el.querySelector(".label").textContent = t.name;
+  el.addEventListener("click", () => window.open(t.url, "_blank", "noopener,noreferrer"));
+  return el;
+}
+
 function renderList() {
   const c = collections[viewingKey];
   listTitleEl.textContent = c.title;
@@ -592,6 +627,30 @@ function renderList() {
         const isActive = viewingKey === playingKey && i === playingIndex && !audio.paused;
         listEl.appendChild(renderTrackRow("track", t, isActive, () => selectTrack(viewingKey, i)));
       });
+      return;
+    }
+    if (sec.external) {
+      const groupId = `${viewingKey}:${secIdx}`;
+      const isOpen = openGroups.has(groupId);
+      const card = document.createElement("div");
+      card.className = "group-card" + (isOpen ? " open" : "");
+      const header = document.createElement("div");
+      header.className = "group-header";
+      header.innerHTML = `
+        <div class="icon">${sec.tracks.length}</div>
+        <div class="label"></div>
+        <div class="chevron">⌄</div>
+      `;
+      header.querySelector(".label").textContent = sec.title;
+      header.addEventListener("click", () => toggleGroup(groupId));
+      card.appendChild(header);
+      const body = document.createElement("div");
+      body.className = "group-body";
+      if (isOpen) {
+        sec.tracks.forEach((t) => body.appendChild(renderExternalRow("subtrack", t)));
+      }
+      card.appendChild(body);
+      listEl.appendChild(card);
       return;
     }
     const groupId = `${viewingKey}:${secIdx}`;
