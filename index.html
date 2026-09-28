@@ -420,25 +420,28 @@ const collections = {
   nestor: {
     title: "Breathwork",
     subtitle: "James Nestor",
+    tracks: [
+      { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
+      { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
+      { file: "audio/box-breathing.mp3", name: "Box Breathing" },
+      { file: "audio/breathe-light.mp3", name: "Breathe Light" },
+      { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
+      { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
+      { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
+      { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
+      { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
+      { file: "audio/kriya.mp3", name: "Kriya" },
+      { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
+      { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
+    ],
+  },
+  misc: {
+    navLabel: "Breathwork - Miscellaneous",
+    title: "Breathwork - Miscellaneous",
+    subtitle: "From Lauren",
+    entryLabel: "links",
     sections: [
       {
-        tracks: [
-          { file: "audio/asthma-prevention.mp3", name: "Asthma Prevention" },
-          { file: "audio/asthma-walking.mp3", name: "Asthma Walking" },
-          { file: "audio/box-breathing.mp3", name: "Box Breathing" },
-          { file: "audio/breathe-light.mp3", name: "Breathe Light" },
-          { file: "audio/coherent-breathing-5min.mp3", name: "Coherent Breathing – 5 Minutes" },
-          { file: "audio/coherent-breathing-8-counts.mp3", name: "Coherent Breathing – 8 Counts" },
-          { file: "audio/coherent-breathing-20min.mp3", name: "Coherent Breathing – 20 Minutes" },
-          { file: "audio/coherent-breathing-ladder.mp3", name: "Coherent Breathing Ladder" },
-          { file: "audio/4-8-8-breathing.mp3", name: "4-8-8 Breathing" },
-          { file: "audio/kriya.mp3", name: "Kriya" },
-          { file: "audio/psychedelic-breathwork.mp3", name: "The Most Psychedelic Breathwork on Planet Earth" },
-          { file: "audio/rectangle-breathing.mp3", name: "Rectangle Breathing" },
-        ],
-      },
-      {
-        title: "Breathwork - Miscellaneous",
         external: true,
         tracks: [
           { url: "https://youtu.be/_E-Ww1qnyLY", name: "Short Softer Breathwork (9 min)" },
@@ -574,13 +577,14 @@ function renderHome() {
   navListEl.innerHTML = "";
   Object.keys(collections).forEach((key) => {
     const c = collections[key];
+    const label = c.navLabel || c.subtitle;
     const el = document.createElement("div");
     el.className = "nav-card";
     el.innerHTML = `
-      <div class="icon">${c.subtitle.trim().charAt(0)}</div>
+      <div class="icon">${label.trim().charAt(0)}</div>
       <div class="info">
-        <div class="title">${c.subtitle}</div>
-        <div class="subtitle">${c.tracks.length} tracks</div>
+        <div class="title">${label}</div>
+        <div class="subtitle">${c.tracks.length} ${c.entryLabel || "tracks"}</div>
       </div>
       <div class="chevron">›</div>
     `;
@@ -623,6 +627,10 @@ function renderList() {
   sectionRanges(c).forEach(({ sec, secIdx, start, end }) => {
     if (!sec.title) {
       sec.tracks.forEach((t, offset) => {
+        if (sec.external) {
+          listEl.appendChild(renderExternalRow("track", t));
+          return;
+        }
         const i = start + offset;
         const isActive = viewingKey === playingKey && i === playingIndex && !audio.paused;
         listEl.appendChild(renderTrackRow("track", t, isActive, () => selectTrack(viewingKey, i)));
